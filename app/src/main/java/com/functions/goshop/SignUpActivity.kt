@@ -61,8 +61,7 @@ class SignUpActivity : AppCompatActivity() {
         confirmPasswordInput = findViewById(R.id.confirmPasswordInput)
         signupButton = findViewById(R.id.signupButton)
         googleSignUp = findViewById(R.id.googleSignUp)
-        facebookSignUp = findViewById(R.id.facebookSignUp)
-        githubSignUp = findViewById(R.id.githubSignUp)
+
         loginLink = findViewById(R.id.loginLink)
 
         // Google Sign In
@@ -119,31 +118,6 @@ class SignUpActivity : AppCompatActivity() {
             googleLauncher.launch(signInIntent)
         }
 
-        // Facebook
-        facebookSignUp.setOnClickListener {
-            LoginManager.getInstance().logInWithReadPermissions(this, listOf("email", "public_profile"))
-            LoginManager.getInstance().registerCallback(callbackManager, object : FacebookCallback<LoginResult> {
-                override fun onSuccess(result: LoginResult) {
-                    handleFacebookAccessToken(result.accessToken)
-                }
-                override fun onCancel() {
-                    Toast.makeText(this@SignUpActivity, "Facebook sign-in canceled", Toast.LENGTH_SHORT).show()
-                }
-                override fun onError(error: FacebookException) {
-                    Toast.makeText(this@SignUpActivity, "Facebook sign-in failed: ${error.message}", Toast.LENGTH_SHORT).show()
-                }
-            })
-        }
-
-        // GitHub
-        githubSignUp.setOnClickListener {
-            val providers = arrayListOf(AuthUI.IdpConfig.GitHubBuilder().build())
-            val signInIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build()
-            startActivityForResult(signInIntent, 200)
-        }
 
         // Go to Login
         loginLink.setOnClickListener {
@@ -161,19 +135,6 @@ class SignUpActivity : AppCompatActivity() {
                     finish()
                 } else {
                     Toast.makeText(this, "Google Auth failed", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
-
-    private fun handleFacebookAccessToken(token: AccessToken) {
-        val credential = FacebookAuthProvider.getCredential(token.token)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this, "Facebook Auth failed", Toast.LENGTH_SHORT).show()
                 }
             }
     }
