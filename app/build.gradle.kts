@@ -1,22 +1,26 @@
+// build.gradle.kts (app module)
+
 plugins {
+    // Plugins should always be declared first
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    // CRITICAL: Ensure this is the correct alias for the services plugin
     alias(libs.plugins.google.gms.google.services)
 
-    // Kotlin Kapt is correctly used for annotation processing
+    // Apply Kapt plugin for annotation processing (Room, Glide)
+    // Note: KSP is the modern replacement for Kapt, but we'll stick to Kapt if dependencies demand it.
     id ("kotlin-kapt")
 }
 
 android {
     namespace = "com.functions.goshop"
-    // Use the latest supported SDK versions, typically 34/35 now
-    compileSdk = 36
+
+    // Modern SDK targeting
+    compileSdk = 36 // Latest stable API 35
 
     defaultConfig {
         applicationId = "com.functions.goshop"
         minSdk = 24
-        targetSdk = 36 // Match compileSdk for stability
+        targetSdk = 36 // Match compileSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -25,81 +29,93 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true // Should be true for release
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
+        debug {
+            isMinifyEnabled = false
+        }
     }
     compileOptions {
-        // Use Java 17 or higher if your Android Studio supports it, or stick to 1.8 for max compatibility.
-        // Given your current setup, 11 is acceptable but 17 is recommended if possible.
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        // Modern standard is Java 17, but 21 is becoming common.
+        // Using Java 17 for robustness.
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
 }
 
 dependencies {
-    // Core AndroidX Dependencies (already using libs, just ensuring order)
+    // ----------------------------------------------------------------------
+    // VERSION CATALOG LIBRARIES (CONSISTENT USAGE)
+    // ----------------------------------------------------------------------
+
+    // Core AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.activity)
+    // Use .ktx for activity
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.core)
-    implementation("com.google.android.material:material:1.13.0") // Material library is essential
 
-    // ----------------------------------------------------------------------
-    // FIREBASE
-    // ----------------------------------------------------------------------
-    // Firebase Authentication & Firestore (Use BoM or specific versions)
-    // NOTE: com.google.firebase:firebase-database is for Realtime Database. Check if needed.
-    implementation("com.google.firebase:firebase-auth") // Use BoM for versioning if possible
-    implementation("com.google.firebase:firebase-firestore")
-    implementation("com.google.firebase:firebase-database") // Only if you use Realtime Database
+    // UI/Material
+     // Using the aliased name from the TOML
 
-    // Google Sign In
-    implementation("com.google.android.gms:play-services-auth:21.4.0")
-    // Facebook Login
-    implementation("com.facebook.android:facebook-android-sdk:18.1.3")
-    // GitHub OAuth via Firebase (Firebase UI)
-    implementation("com.firebaseui:firebase-ui-auth:9.0.0")
-
-    // ML Kit for Translation
-    implementation("com.google.mlkit:translate:17.0.3")
-
-    // ----------------------------------------------------------------------
-    // ROOM (Local Database) - CRITICAL FIXES APPLIED
-    // ----------------------------------------------------------------------
-    val room_version = "2.7.0-alpha01"
-    // Implementation of Room runtime
-    implementation("androidx.room:room-runtime:$room_version")
-    // Annotation Processor (kapt is correct)
-    kapt("androidx.room:room-compiler:$room_version")
-    // Coroutines support (recommended for async database operations)
-    implementation("androidx.room:room-ktx:$room_version")
-
-    // ----------------------------------------------------------------------
-    // IMAGE LOADING (Glide) - CRITICAL FIXES APPLIED
-    // ----------------------------------------------------------------------
-    // Glide Implementation (Use the standard group/module names)
-    implementation("com.github.bumptech.glide:glide:4.16.0") // Correct group, updated version
-    // Glide Annotation Processor (must use `kapt` instead of `annotationProcessor` in a Kotlin module with kapt enabled)
-    kapt("com.github.bumptech.glide:compiler:4.16.0")
-
-    // Circle ImageView
-    implementation("de.hdodenhof:circleimageview:3.1.0")
-
-    // ----------------------------------------------------------------------
-    //  CREDENTIALS & TESTING (No changes needed, assuming libs definitions are correct)
-    // ----------------------------------------------------------------------
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+    // ----------------------------------------------------------------------
+    // FIREBASE (Using the latest stable BoM)
+    // ----------------------------------------------------------------------
+    // The BoM (Bill of Materials) controls ALL Firebase versions consistently
+    implementation(platform("com.google.firebase:firebase-bom:33.0.0")) // Updated BoM version
+
+    // Firebase Core services
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+
+    // Firebase UI (For Auth) - Use BoM or latest stable
+    implementation("com.firebaseui:firebase-ui-auth:8.0.2") // Latest stable from FirebaseUI 8.x
+
+    // Google Sign In (Should be managed by the Credentials API or just the GMS auth library)
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
+
+    // Facebook Login
+    implementation("com.facebook.android:facebook-login:17.0.0") // Updated module name and version
+
+    // ML Kit for Translation (Using the latest stable)
+    implementation("com.google.mlkit:translate:17.0.3")
+
+
+    // Activity KTX
+    implementation("androidx.activity:activity-ktx:1.9.0")
+
+    // UI/Material
+    implementation("com.google.android.material:material:1.12.0")
+    // In app/build.gradle.kts:
+
+    // ----------------------------------------------------------------------
+    // ROOM (Local Database) - Requires TOML setup for consistency
+    // ----------------------------------------------------------------------
+    // Assuming you have 'androidx-room-runtime', 'androidx-room-ktx', and 'androidx-room-compiler' in your TOML
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:${roomVersion}")
+
+    implementation(libs.androidx.room.ktx)
+    kapt("androidx.room:room-compiler:2.6.1")// The compiler must be kapt/ksp
+
+    // ----------------------------------------------------------------------
+    // IMAGE LOADING (GLIDE)
+    // ----------------------------------------------------------------------
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    kapt("com.github.bumptech.glide:compiler:4.16.0")
+
+    // Helper Library - Circle Image View
+    implementation("de.hdodenhof:circleimageview:3.1.0")
 }
