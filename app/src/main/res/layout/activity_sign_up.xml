@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="24dp">
+
+        <!-- App Logo -->
+        <ImageView
+            android:id="@+id/appLogo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/ic_logo_purple"
+            android:layout_marginTop="20dp"
+            android:contentDescription="App Logo" />
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="24dp"
+            android:gravity="center"
+            android:background="@drawable/purple_card_outline"
+            android:layout_gravity="center">
+                <TextView
+                    android:id="@+id/loginTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Sign Up"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="10dp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="12dp" />
+                <!-- Email Input -->
+                <EditText
+                    android:id="@+id/emailInput"
+                    android:layout_width="match_parent"
+                    android:padding="7dp"
+                    android:textColor="@color/primaryColor"
+                    android:layout_height="48dp"
+                    android:textColorHint="@color/primaryColor"
+                    android:background="@drawable/purple_card_outline"
+                    android:drawableStart="@drawable/ic_email"
+                    android:hint=" Email Address"/>
+                <!-- Username Input -->
+                <EditText
+                    android:id="@+id/usernameInput"
+                    android:layout_width="match_parent"
+                    android:textColor="@color/primaryColor"
+                    android:padding="5dp"
+                    android:textColorHint="@color/primaryColor"
+                    android:layout_height="48dp"
+                    android:background="@drawable/purple_card_outline"
+                    android:drawableStart="@drawable/ic_person"
+                    android:hint="Username"
+                    android:layout_marginTop="12dp"/>
+
+
+                <!-- Password Input -->
+                <EditText
+                    android:id="@+id/passwordInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:textColor="@color/primaryColor"
+                    android:drawableStart="@drawable/ic_lock"
+                    app:passwordToggleEnabled="true"
+                    android:textColorHint="@color/primaryColor"
+                    android:padding="5dp"
+                    android:background="@drawable/purple_card_outline"
+                    android:hint="Password"
+                    android:layout_marginTop="12dp"/>
+
+
+                <!-- Confirm Password -->
+                <EditText
+                    android:id="@+id/confirmPasswordInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:drawableStart="@drawable/ic_lock"
+                    app:passwordToggleEnabled="true"
+                    android:textColor="@color/primaryColor"
+                    android:background="@drawable/purple_card_outline"
+                    android:hint="Confirm Password"
+                    android:textColorHint="@color/primaryColor"
+                    android:padding="5dp"
+                    android:layout_marginTop="12dp"/>
+
+
+                <!-- Sign Up Button -->
+                <Button
+                    android:id="@+id/signupButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Sign Up"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#9C27B0"
+                    app:cornerRadius="50dp"
+                    android:layout_marginTop="20dp" />
+            <TextView
+                android:id="@+id/loginLink"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Already have an account?Login"
+                android:textColor="@color/primaryColor"/>
+            </LinearLayout>
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="OR"
+            android:layout_marginTop="10dp"/>
+        <!-- Social Login Icons -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <ImageView
+                android:id="@+id/googleSignUp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_google" />
+
+            <ImageView
+                android:id="@+id/facebookSignUp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_facebook"
+                android:layout_marginStart="16dp" />
+
+            <ImageView
+                android:id="@+id/githubSignUp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_github"
+                android:layout_marginStart="16dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
