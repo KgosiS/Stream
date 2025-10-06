@@ -136,19 +136,7 @@
                 android:layout_height="48dp"
                 android:src="@drawable/ic_google" />
 
-            <ImageView
-                android:id="@+id/facebookSignUp"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_facebook"
-                android:layout_marginStart="16dp" />
 
-            <ImageView
-                android:id="@+id/githubSignUp"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_github"
-                android:layout_marginStart="16dp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

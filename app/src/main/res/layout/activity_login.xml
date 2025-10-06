@@ -116,20 +116,7 @@
                 android:src="@drawable/ic_google"
                 android:contentDescription="Google Login" />
 
-            <ImageView
-                android:id="@+id/facebookLogin"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_facebook"
-                android:layout_marginStart="16dp"
-                android:contentDescription="Facebook Login" />
 
-            <ImageView
-                android:id="@+id/githubLogin"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:src="@drawable/ic_github"
-                android:layout_marginStart="16dp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>
