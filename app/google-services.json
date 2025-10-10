@@ -1,33 +1,34 @@
 {
   "project_info": {
-    "project_number": "1025085728503",
-    "project_id": "go-shop-48d24",
-    "storage_bucket": "go-shop-48d24.firebasestorage.app"
+    "project_number": "60409803691",
+    "firebase_url": "https://go1shop-default-rtdb.firebaseio.com",
+    "project_id": "go1shop",
+    "storage_bucket": "go1shop.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1025085728503:android:4ce8322c283213d714d5f2",
+        "mobilesdk_app_id": "1:60409803691:android:e4a5d4d03d7be7fa1418ee",
         "android_client_info": {
           "package_name": "com.functions.goshop"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1025085728503-vrss9gns08bdbg9k1t663lmu50g4vmfd.apps.googleusercontent.com",
+          "client_id": "60409803691-ir4athggrs451rvbqkketf1jd0rtuf8f.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAdklxwlkxz5ye7ATN22IeOgiNQzjWfof8"
+          "current_key": "AIzaSyBl_48ylJqHCax9ZNmjd_fB0QdX6UkPyFs"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1025085728503-vrss9gns08bdbg9k1t663lmu50g4vmfd.apps.googleusercontent.com",
+              "client_id": "60409803691-ir4athggrs451rvbqkketf1jd0rtuf8f.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
