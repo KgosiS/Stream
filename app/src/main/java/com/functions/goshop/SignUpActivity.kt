@@ -3,6 +3,7 @@ package com.functions.goshop
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.*
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -39,12 +40,21 @@ class SignUpActivity : AppCompatActivity() {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
                 try {
                     val account = task.getResult(ApiException::class.java)
+                    if (account.idToken == null) {
+                        Log.e("GOOGLE_LOGIN", "idToken is NULL — check default_web_client_id in strings.xml")
+                        Toast.makeText(this, "Google sign-in failed (missing token)", Toast.LENGTH_SHORT).show()
+                        return@registerForActivityResult
+                    }
                     firebaseAuthWithGoogle(account.idToken!!)
                 } catch (e: ApiException) {
+                    Log.e("GOOGLE_LOGIN", "Sign-in error: ${e.statusCode} ${e.message}")
                     Toast.makeText(this, "Google sign-in failed: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
+            } else {
+                Log.e("GOOGLE_LOGIN", "Result not OK, code: ${result.resultCode}")
             }
         }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -131,13 +141,35 @@ class SignUpActivity : AppCompatActivity() {
         auth.signInWithCredential(credential)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    startActivity(Intent(this, MainActivity::class.java))
-                    finish()
+                    val user = auth.currentUser
+                    user?.let {
+                        val uid = it.uid
+                        val email = it.email ?: ""
+                        val username = it.displayName ?: "GoogleUser"
+
+                        val userMap = hashMapOf(
+                            "uid" to uid,
+                            "email" to email,
+                            "username" to username,
+                            "created_at" to System.currentTimeMillis()
+                        )
+
+                        firestore.collection("users").document(uid).set(userMap)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Signed in with Google!", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, MainActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Firestore error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                    }
                 } else {
-                    Toast.makeText(this, "Google Auth failed", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Google Auth failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
                 }
             }
     }
+
 
     // ⚡ IMPORTANT: Handle results for Facebook + GitHub
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

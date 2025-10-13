@@ -16,7 +16,7 @@
       "oauth_client": [
         {
           "client_id": "60409803691-ir4athggrs451rvbqkketf1jd0rtuf8f.apps.googleusercontent.com",
-          "client_type": 3
+          "client_type": 1
         }
       ],
       "api_key": [
@@ -29,7 +29,7 @@
           "other_platform_oauth_client": [
             {
               "client_id": "60409803691-ir4athggrs451rvbqkketf1jd0rtuf8f.apps.googleusercontent.com",
-              "client_type": 3
+              "client_type": 1
             }
           ]
         }
