@@ -52,9 +52,34 @@ android {
 
 dependencies {
     // ----------------------------------------------------------------------
-    // VERSION CATALOG LIBRARIES (CONSISTENT USAGE)
+    // TESTING DEPENDENCIES (The Consolidated Fix)
     // ----------------------------------------------------------------------
 
+    // 1. Core JUnit Framework (Correct)
+    testImplementation("junit:junit:4.13.2")
+
+    // 2. Kotlin Test (Bridges JUnit with Kotlin standard library)
+    // THIS is the line that must be scoped with 'testImplementation'
+    testImplementation(kotlin("test"))
+
+    // 3. AndroidX Extensions (Recommended)
+    testImplementation("androidx.test.ext:junit-ktx:1.2.1")
+
+    // Optional: Mocking framework for local tests
+    testImplementation("org.mockito:mockito-core:4.11.0")
+
+    // For testing coroutines
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+
+    // ----------------------------------------------------------------------
+    // INSTRUMENTED TESTS (Runs on emulator/device)
+    // ----------------------------------------------------------------------
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+
+    // Your existing dependencies remain here...
+    implementation ("androidx.appcompat:appcompat:1.7.0")
     // Core AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
@@ -64,10 +89,6 @@ dependencies {
     // UI/Material
      // Using the aliased name from the TOML
 
-    // Testing
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 
     // ----------------------------------------------------------------------
     // FIREBASE (Using the latest stable BoM)
@@ -118,4 +139,5 @@ dependencies {
 
     // Helper Library - Circle Image View
     implementation("de.hdodenhof:circleimageview:3.1.0")
+    implementation(kotlin("test"))
 }
