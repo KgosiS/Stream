@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -199,16 +200,30 @@ class MainActivity : AppCompatActivity() {
         val dialog = android.app.Dialog(this)
         dialog.setContentView(R.layout.dialog_profile)
 
+        // Set the dialog window's properties for full width
+        // This MUST be done after setContentView() but before dialog.show() or immediately after.
+        // Doing it here ensures the dialog takes the full width of the screen.
+        if (dialog.window != null) {
+            dialog.window!!.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            // Optional: Remove the default dark background behind the dialog's custom view
+
+        }
+
         val profileName = dialog.findViewById<TextView>(R.id.profileUserName)
         val profileEmail = dialog.findViewById<TextView>(R.id.profileUserEmail)
-        val logoutView = dialog.findViewById<View>(R.id.logoutTextView)
+        val logoutView = dialog.findViewById<LinearLayout>(R.id.logoutLayout)
+        val logoutTextView = dialog.findViewById<TextView>(R.id.logoutTextView) // Get the TextView for translation
+
         val editProfileButton = dialog.findViewById<View>(R.id.editProfileButton)
         val profileImage = dialog.findViewById<ImageView>(R.id.profileImageView)
         val sellItems = dialog.findViewById<LinearLayout>(R.id.sellMerchandiseLayout)
         val myUploads = dialog.findViewById<LinearLayout>(R.id.myUploadsLayout)
 
-        val sellItemsText = sellItems.findViewById<TextView>(R.id.sellItemsText)
-        val myUploadsText = myUploads.findViewById<TextView>(R.id.myUploadsText)
+        val sellItemsText = dialog.findViewById<TextView>(R.id.sellItemsText) // Find directly via dialog if using my suggested XML
+        val myUploadsText = dialog.findViewById<TextView>(R.id.myUploadsText) // Find directly via dialog if using my suggested XML
 
         val prefs = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
         val langCode = prefs.getString("LANGUAGE_CODE", TranslateLanguage.ENGLISH) ?: TranslateLanguage.ENGLISH
@@ -216,7 +231,7 @@ class MainActivity : AppCompatActivity() {
         translateDialogText(
             profileName,
             profileEmail,
-            logoutView as TextView,
+            logoutTextView, // Use the TextView for translation
             editProfileButton as TextView,
             sellItemsText,
             myUploadsText,
@@ -228,6 +243,7 @@ class MainActivity : AppCompatActivity() {
 
         loadProfileImage(profileImage, currentUser?.uid)
 
+        // Use the new clickable LinearLayout for logout
         logoutView?.setOnClickListener {
             auth.signOut()
             dialog.dismiss()

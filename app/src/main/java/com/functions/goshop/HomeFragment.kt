@@ -4,8 +4,10 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -190,50 +192,168 @@ class HomeFragment : Fragment() {
     // --------------------------------------------------------------------------------------------------
 
     private fun showProductDetailsDialog(product: Product) {
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_product_details, null)
-        val dialog = AlertDialog.Builder(requireContext()).setView(dialogView).create()
+        val dialogView = layoutInflater.inflate(R.layout.dialog_product_details, null)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
 
         val productImage = dialogView.findViewById<ImageView>(R.id.productImage)
         val title = dialogView.findViewById<TextView>(R.id.productTitle)
         val priceTv = dialogView.findViewById<TextView>(R.id.productPrice)
         val description = dialogView.findViewById<TextView>(R.id.productDescription)
         val buyNowButton = dialogView.findViewById<Button>(R.id.buyNowButton)
-        val closeBtn = dialogView.findViewById<ImageView>(R.id.backButton)
+        val backButton = dialogView.findViewById<ImageView>(R.id.backButton)
+
+        // NEW RATING UI ELEMENTS
+        val productRatingAvgTv = dialogView.findViewById<TextView>(R.id.productRating)
         val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
 
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val productId = product.id
+
+        // --- UI SETUP ---
         title.text = product.title
-        product.price.toDoubleOrNull()?.let {
-            priceTv.text = String.format("R %.2f", it)
+
+        product.price.toDoubleOrNull()?.let { priceValue ->
+            priceTv.text = String.format("R %.2f", priceValue)
         } ?: run {
-            priceTv.text = "R ${product.price}"
+            priceTv.text = "R 0.00"
         }
+
         description.text = product.description
 
+        // Set a default value until actual rating is loaded
+        productRatingAvgTv.text = "Loading rating..."
+
         try {
-            val imageBytes = android.util.Base64.decode(product.imageBase64, android.util.Base64.DEFAULT)
-            val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            val imageBytes = Base64.decode(product.imageBase64, Base64.DEFAULT)
+            val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             productImage.setImageBitmap(bitmap)
         } catch (e: Exception) {
             productImage.setImageResource(R.drawable.smartwatch_example)
         }
 
-        // Translate dialog fields
-        val prefs = requireContext().getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
-        val langCode = prefs.getString("LANGUAGE_CODE", "en") ?: "en"
-        translateDialogText(title, priceTv, description, buyNowButton, targetLang = langCode)
+        // --- RATING LOGIC ---
 
-        ratingBar.setOnRatingBarChangeListener { _, newRating, _ ->
-            saveProductRating(product, newRating)
+        // 1. Load the User's Existing Rating (and average product rating)
+        if (userId.isNotEmpty()) {
+            loadRatings(productId, userId, ratingBar, productRatingAvgTv)
+        } else {
+            // Disable rating input if user is not logged in
+            ratingBar.setIsIndicator(true)
+            productRatingAvgTv.text = "Login to rate"
         }
 
+
+        // 2. Setup Listener to Save New Rating
+        ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
+            if (fromUser && userId.isNotEmpty()) {
+                saveUserRating(productId, userId, rating, productRatingAvgTv)
+            } else if (fromUser && userId.isEmpty()) {
+                Toast.makeText(requireContext(), "Please log in to submit a rating.", Toast.LENGTH_SHORT).show()
+                // Reset the rating bar visual if they tried to click while logged out
+                ratingBar.rating = 0f
+            }
+        }
+
+
+        // --- BUTTON LISTENERS ---
         buyNowButton.setOnClickListener {
-            dialog.dismiss()
             showBuyDialog(product)
+            dialog.dismiss()
         }
-        closeBtn.setOnClickListener { dialog.dismiss() }
+
+        backButton.setOnClickListener { dialog.dismiss() }
 
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
+    }
+
+
+// --- NEW HELPER FUNCTIONS ---
+
+    /**
+     * Loads the user's specific rating and the product's average rating.
+     * @param productId The ID of the product.
+     * @param userId The ID of the current user.
+     * @param ratingBar The RatingBar UI element for user input.
+     * @param productRatingAvgTv The TextView to display the overall average rating.
+     */
+    private fun loadRatings(
+        productId: String,
+        userId: String,
+        ratingBar: RatingBar,
+        productRatingAvgTv: TextView
+    ) {
+        // 1. Load User's Existing Rating (for UI update)
+        firestore.collection("ratings").document(productId)
+            .collection("userRatings").document(userId)
+            .get()
+            .addOnSuccessListener { doc ->
+                if (doc.exists()) {
+                    val existingRating = doc.getDouble("rating")?.toFloat() ?: 0f
+                    ratingBar.rating = existingRating // Set the user's previous rating
+                } else {
+                    ratingBar.rating = 0f
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Error loading your rating.", Toast.LENGTH_SHORT).show()
+            }
+
+        // 2. Load and Calculate Average Rating (for display)
+        firestore.collection("ratings").document(productId)
+            .collection("userRatings")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                if (snapshot.isEmpty) {
+                    productRatingAvgTv.text = "No ratings yet (0)"
+                    return@addOnSuccessListener
+                }
+
+                var totalRating = 0.0
+                for (doc in snapshot.documents) {
+                    totalRating += doc.getDouble("rating") ?: 0.0
+                }
+
+                val averageRating = totalRating / snapshot.size()
+                productRatingAvgTv.text = String.format("★ %.1f Rating (%d)", averageRating, snapshot.size())
+            }
+    }
+
+
+    /**
+     * Saves the user's new rating to Firestore and updates the UI.
+     * @param productId The ID of the product.
+     * @param userId The ID of the current user.
+     * @param rating The new rating value (1.0 to 5.0).
+     * @param productRatingAvgTv The TextView to update the overall product average.
+     */
+    private fun saveUserRating(
+        productId: String,
+        userId: String,
+        rating: Float,
+        productRatingAvgTv: TextView
+    ) {
+        val ratingData = hashMapOf(
+            "userId" to userId,
+            "rating" to rating.toDouble(),
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        firestore.collection("ratings").document(productId)
+            .collection("userRatings").document(userId)
+            .set(ratingData) // Use set() to create or overwrite
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Rating updated to $rating stars!", Toast.LENGTH_SHORT).show()
+                // After successful save, immediately reload the average to update the UI
+                loadRatings(productId, userId, RatingBar(requireContext()), productRatingAvgTv)
+                // Note: We use a dummy RatingBar instance since we only need to update the Avg TextView here.
+                // The original RatingBar's value is already updated by the OnRatingBarChangeListener.
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Failed to save rating: ${e.message}", Toast.LENGTH_LONG).show()
+            }
     }
 
     private fun showBuyDialog(product: Product) {
