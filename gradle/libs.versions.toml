@@ -29,7 +29,9 @@ credentialsPlayServicesAuth = "1.2.2" # Updated from 1.5.0 (Use latest stable, m
 googleid = "1.1.1"              # Stable, kept
 
 # Local Database (Room) - MAJOR UPDATE
-room = "2.6.1"                  # New consolidated version key for Room (from 2.8.1)
+room = "2.6.1"
+generativeai = "0.9.0"
+firebaseAi = "17.5.0"                  # New consolidated version key for Room (from 2.8.1)
 
 [libraries]
 # AndroidX Core
@@ -58,7 +60,9 @@ googleid = { group = "com.google.android.libraries.identity.googleid", name = "g
 # Local Database (Room) - CONSOLIDATED & MODERNIZED
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
-androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" } # Added compiler for annotation processing
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+firebase-ai = { group = "com.google.firebase", name = "firebase-ai", version.ref = "firebaseAi" } # Added compiler for annotation processing
 
 
 

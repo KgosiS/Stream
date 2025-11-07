@@ -16,8 +16,12 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
 import com.bumptech.glide.Glide
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
@@ -28,6 +32,7 @@ import com.google.firebase.firestore.SetOptions
 import com.google.mlkit.nl.translate.TranslateLanguage
 import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
@@ -43,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     // Product image temp storage
     private var currentProductImageBase64: String? = null
     private var currentProductImageView: ImageView? = null
+    private lateinit var chatBot: FloatingActionButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -189,7 +195,9 @@ class MainActivity : AppCompatActivity() {
         val profileIcon = findViewById<ImageView>(R.id.profile_icon)
         val translatorIcon = findViewById<ImageView>(R.id.cart_icon)
         val searchLayout = findViewById<LinearLayout>(R.id.searchLayout)
+        val chatBot = findViewById<FloatingActionButton>(R.id.chatbotFab)
 
+        chatBot.setOnClickListener { showChatBot() }
         profileIcon.setOnClickListener { showProfilePopup() }
         translatorIcon.setOnClickListener { showLanguageSelectionDialog() }
         searchLayout.setOnClickListener { startActivity(Intent(this, SearchActivity::class.java)) }
@@ -566,5 +574,86 @@ class MainActivity : AppCompatActivity() {
         val langCode = prefs.getString("LANGUAGE_CODE", TranslateLanguage.ENGLISH) ?: TranslateLanguage.ENGLISH
         applyTranslations(langCode)
     }
+
+    private fun showChatBot() {
+        // Inflate the custom dialog layout
+        val dialogView = layoutInflater.inflate(R.layout.dialog_chatbot, null)
+
+        // Create the dialog
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+
+        // Set width and height AFTER dialog is created
+        dialog.setOnShowListener {
+            dialog.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT, // Full width
+                450.dpToPx(this)                     // Fixed height 250dp
+            )
+        }
+
+        // --- View references ---
+        val messageRecyclerView = dialogView.findViewById<RecyclerView>(R.id.messageRecyclerView)
+        val messageEditText = dialogView.findViewById<EditText>(R.id.messageEditText)
+        val sendButton = dialogView.findViewById<ImageButton>(R.id.sendButton)
+        val closeButton = dialogView.findViewById<ImageView>(R.id.closeButton)
+
+        // --- Chat setup ---
+        val messages = mutableListOf<Message>()
+        val adapter = MessageAdapter(messages)
+        val chatbotManager = ChatbotManager()
+
+        messageRecyclerView.layoutManager = LinearLayoutManager(this).apply {
+            stackFromEnd = true
+        }
+        messageRecyclerView.adapter = adapter
+
+
+
+        // --- Close Button ---
+        closeButton.setOnClickListener { dialog.dismiss() }
+
+        // --- Send Button Logic ---
+        sendButton.setOnClickListener {
+            val userMessage = messageEditText.text.toString().trim()
+            if (userMessage.isEmpty()) return@setOnClickListener
+
+            // Show user's message
+            adapter.addMessage(Message(userMessage, timestamp = "Now", isUser = true))
+            messageEditText.setText("")
+            messageRecyclerView.scrollToPosition(adapter.itemCount - 1)
+
+            // Show "typing..." while waiting
+            val typingMessage = Message("Assistant is typing...", "", false)
+            adapter.addMessage(typingMessage)
+            messageRecyclerView.scrollToPosition(adapter.itemCount - 1)
+
+            lifecycleScope.launch {
+                // Remove typing message
+                val typingIndex = messages.indexOf(typingMessage)
+                if (typingIndex != -1) {
+                    messages.removeAt(typingIndex)
+                    adapter.notifyItemRemoved(typingIndex)
+                }
+
+                // Get response from chatbot
+                val botResponseText = chatbotManager.getChatbotResponse(userMessage)
+
+                // Display bot response
+                val botMessage = Message(botResponseText, timestamp = "Now", isUser = false)
+                adapter.addMessage(botMessage)
+                messageRecyclerView.scrollToPosition(adapter.itemCount - 1)
+            }
+        }
+
+        dialog.show()
+    }
+
+    // Extension function to convert dp to px
+    fun Int.dpToPx(context: android.content.Context): Int =
+        (this * context.resources.displayMetrics.density).toInt()
+
+
 
 }

@@ -51,6 +51,8 @@ android {
 }
 
 dependencies {
+    implementation(libs.generativeai)
+
     // ----------------------------------------------------------------------
     // TESTING DEPENDENCIES (The Consolidated Fix)
     // ----------------------------------------------------------------------
@@ -76,6 +78,7 @@ dependencies {
     // ----------------------------------------------------------------------
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
 
 
     // Your existing dependencies remain here...
