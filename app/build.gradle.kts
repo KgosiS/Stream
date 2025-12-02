@@ -12,13 +12,13 @@ plugins {
 }
 
 android {
-    namespace = "com.functions.goshop"
+    namespace = "com.functions.nerdify"
 
     // Modern SDK targeting
     compileSdk = 36 // Latest stable API 35
 
     defaultConfig {
-        applicationId = "com.functions.goshop"
+        applicationId = "com.functions.nerdify"
         minSdk = 24
         targetSdk = 36 // Match compileSdk
         versionCode = 1

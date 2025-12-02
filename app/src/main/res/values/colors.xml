@@ -7,4 +7,11 @@
     <color name="accentColor">#FFFFFF</color>
     <color name="textColor">#222222</color>
     <color name="hintColor">#9E9E9E</color>
+
+    <color name="colorNerdifyPrimary">#3F51B5</color>  
+    <color name="colorNerdifyPrimaryDark">#303F9F</color>
+    <color name="colorNerdifyAccent">#FFC107</color>   
+     <color name="colorNerdifyBackground">#E8EAF6</color> 
+     <color name="colorTextDark">#212121</color>
+    <color name="colorTextLight">#FFFFFF</color>
 </resources>

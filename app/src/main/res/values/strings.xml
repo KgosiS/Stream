@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Go Shop</string>
+    <string name="app_name">Nerdify</string>
     <string name="default_web_client_id">60409803691-ir4athggrs451rvbqkketf1jd0rtuf8f.apps.googleusercontent.com</string>
     <string name="facebook_app_id">1455192432391206</string>
     <string name="fb_login_protocol_scheme">fb1455192432391206</string>
